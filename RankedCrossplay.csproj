@@ -1,0 +1,61 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="15.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <Import Project="$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props" Condition="Exists('$(MSBuildExtensionsPath)\$(MSBuildToolsVersion)\Microsoft.Common.props')" />
+  <PropertyGroup>
+    <Configuration Condition=" '$(Configuration)' == '' ">Debug</Configuration>
+    <Platform Condition=" '$(Platform)' == '' ">AnyCPU</Platform>
+    <ProjectGuid>{7C2E5B19-3A84-4D6F-9E21-B05A8C4D17E3}</ProjectGuid>
+    <OutputType>Library</OutputType>
+    <RootNamespace>RankedCrossplay</RootNamespace>
+    <AssemblyName>RankedCrossplay</AssemblyName>
+    <TargetFrameworkVersion>v4.8</TargetFrameworkVersion>
+    <LangVersion>7.3</LangVersion>
+    <FileAlignment>512</FileAlignment>
+    <Deterministic>true</Deterministic>
+    <!-- Required: build with /p:GamePath="<your Gorilla Tag folder>", or set a GamePath environment variable. -->
+    <GamePath Condition="'$(GamePath)' == ''"></GamePath>
+    <ManagedPath>$(GamePath)\Gorilla Tag_Data\Managed</ManagedPath>
+    <BepInExCorePath>$(GamePath)\BepInEx\core</BepInExCorePath>
+    <PluginsPath>$(GamePath)\BepInEx\plugins</PluginsPath>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Debug|AnyCPU' ">
+    <DebugSymbols>true</DebugSymbols>
+    <DebugType>full</DebugType>
+    <Optimize>false</Optimize>
+    <OutputPath>bin\Debug\</OutputPath>
+    <DefineConstants>DEBUG;TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <PropertyGroup Condition=" '$(Configuration)|$(Platform)' == 'Release|AnyCPU' ">
+    <!-- No PDB in a release, so the DLL does not carry the path of the folder it was built in. -->
+    <DebugType>none</DebugType>
+    <Optimize>true</Optimize>
+    <OutputPath>bin\Release\</OutputPath>
+    <DefineConstants>TRACE</DefineConstants>
+    <ErrorReport>prompt</ErrorReport>
+    <WarningLevel>4</WarningLevel>
+  </PropertyGroup>
+  <ItemGroup>
+    <Reference Include="System" />
+    <Reference Include="System.Core" />
+    <Reference Include="BepInEx"><HintPath>$(BepInExCorePath)\BepInEx.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="0Harmony"><HintPath>$(BepInExCorePath)\0Harmony.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="Assembly-CSharp"><HintPath>$(ManagedPath)\Assembly-CSharp.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="UnityEngine"><HintPath>$(ManagedPath)\UnityEngine.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="UnityEngine.CoreModule"><HintPath>$(ManagedPath)\UnityEngine.CoreModule.dll</HintPath><Private>False</Private></Reference>
+    <!-- PhotonNetworkController is built on Photon's classes, so the compiler needs these to read it. -->
+    <Reference Include="Photon3Unity3D"><HintPath>$(ManagedPath)\Photon3Unity3D.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="PhotonRealtime"><HintPath>$(ManagedPath)\PhotonRealtime.dll</HintPath><Private>False</Private></Reference>
+    <Reference Include="PhotonUnityNetworking"><HintPath>$(ManagedPath)\PhotonUnityNetworking.dll</HintPath><Private>False</Private></Reference>
+  </ItemGroup>
+  <ItemGroup>
+    <Compile Include="Plugin.cs" />
+  </ItemGroup>
+  <Import Project="$(MSBuildToolsPath)\Microsoft.CSharp.targets" />
+  <!-- Copies the built DLL into BepInEx\plugins. Skipped in CI or when the game folder is missing;
+       ContinueOnError so a running game (which locks the DLL) gives a warning instead of a failed build. -->
+  <Target Name="CopyToPlugins" AfterTargets="Build" Condition="'$(CI)' != 'TRUE' And Exists('$(PluginsPath)')">
+    <Copy SourceFiles="$(TargetPath)" DestinationFolder="$(PluginsPath)" ContinueOnError="true" />
+  </Target>
+</Project>
